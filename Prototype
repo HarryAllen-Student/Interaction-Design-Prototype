@@ -1,1 +1,58 @@
 #Paste your code here! Put your name and what you did in a comment to help us keep track of things
+## this is the code that lights up the pixles based on how much time they've been working with indicating breaks [Sabrina]
+
+from adafruit_circuitplayground import cp
+import time
+
+green = [0,255,0] # work time colour
+blue = [0,0,255] # break time colour
+off_state = [0,0,0]
+pixel_amount = len(cp.pixels)
+cp.pixels.brightness = 0.1
+
+work_time_minutes = 50 # this is the variable that the user choses to work, used to testing in seconds
+work_time_increment = work_time_minutes/pixel_amount # set how many minutes are in 1 neopixel (10)
+time_elapsed_secs = 0 # initilising global variable, will be updated later
+
+break_amount = 3 # variable chosen by user how many breaks they want to take
+break_interval_dict = {1:5,2:4,3:3,4:2} # dictionary to determine when breaks lights happen depening on number of breaks
+break_interval = break_interval_dict[break_amount] #accesses interval from dict depending on number of breaks
+
+
+
+
+while True:
+    stop_timer = 0 # stores time when timer was stopped
+    stopped_time = 0 # counts seconds it has been stopped
+
+
+    i = 0
+    previous = time.time()
+
+    while i < pixel_amount:
+        current = time.time()
+        if cp.switch == True: # this will be replaced by flag of uder being there
+
+            if (i+1) % break_interval == 0 and i!= 9: # lights pixels according to break schedule
+                cp.pixels[i] = blue 
+
+            else:
+                cp.pixels[i] = green
+
+
+            time_elapsed_secs = (current - previous) - stopped_time
+            #print("Seconds elapsed: ",time_elapsed_secs) #for testing
+            time.sleep(0.5)
+
+            if time_elapsed_secs % work_time_increment == 0 and time_elapsed_secs != 0:
+                i+= 1
+                time.sleep(1) # lights up next pixel when time has elapsed
+
+        else: # if user is not there
+
+            current_stop = time.time() #times when timer is stopped
+            stopped_time =(current_stop - previous) - time_elapsed_secs # counts how long it was stopped, will be subtracted from elapsed time when timer starts again
+            #print("stopped at: ", time_elapsed_secs) # for testing
+            #print("stopped for: ", stopped_time) # for testing
+            time.sleep(0.5)
+
