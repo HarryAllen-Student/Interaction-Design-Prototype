@@ -56,7 +56,7 @@ while True:
             #print("stopped for: ", stopped_time) # for testing
             time.sleep(0.5)
 
-## this is the code that switches between visual modality (lights) and auditory modality (sound tone), and allows lights to be turned on/off
+## this is the code that switches between visual modality (lights) and auditory modality (sound tone), and allows lights to be turned on/off [Harry]
 from adafruit_circuitplayground import cp
 
 cp.pixels.brightness = 0.3
