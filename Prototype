@@ -56,3 +56,19 @@ while True:
             #print("stopped for: ", stopped_time) # for testing
             time.sleep(0.5)
 
+## this is the code that switches between visual modality (lights) and auditory modality (sound tone), and allows lights to be turned on/off
+from adafruit_circuitplayground import cp
+
+cp.pixels.brightness = 0.3
+
+while True:
+    if cp.switch:
+        if cp.button_a:
+            cp.pixels.fill((50, 0, 0))  # Turn on using Button A (D4)
+        elif cp.button_b:
+            cp.pixels.fill((0, 0, 0))   # Turn off using Button B (D5)
+    else:
+        cp.pixels.fill((0, 0, 0))   # When switched, turn off LEDS automatically and play tune
+        cp.play_tone(262, 1)
+        cp.play_tone(294, 1)
+      
