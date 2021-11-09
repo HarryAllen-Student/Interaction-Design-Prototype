@@ -1,74 +1,74 @@
-#Paste your code here! Put your name and what you did in a comment to help us keep track of things
-## this is the code that lights up the pixles based on how much time they've been working with indicating breaks [Sabrina]
-
 from adafruit_circuitplayground import cp
+import board # access board pins to connext external sensors/actuators
+import busio # ultrasonic sensor requires Serial connection to send/receive the distance data
+import adafruit_us100 #
 import time
 
-green = [0,255,0] # work time colour
-blue = [0,0,255] # break time colour
-off_state = [0,0,0]
-pixel_amount = len(cp.pixels)
+current_time = time.time() # always moving
+start_time = current_time
+
+uart = busio.UART(board.TX, board.RX, baudrate=9600) # obj_instance = busio.UART(TX, RX, speed)
+
+
+us100 = adafruit_us100.US100(uart) # obj_instance = adafruit_us100.US100(connection)
+
 cp.pixels.brightness = 0.1
-
-work_time_minutes = 50 # this is the variable that the user choses to work, used to testing in seconds
-work_time_increment = work_time_minutes/pixel_amount # set how many minutes are in 1 neopixel (10)
-time_elapsed_secs = 0 # initilising global variable, will be updated later
-
-break_amount = 3 # variable chosen by user how many breaks they want to take
-break_interval_dict = {1:5,2:4,3:3,4:2} # dictionary to determine when breaks lights happen depening on number of breaks
-break_interval = break_interval_dict[break_amount] #accesses interval from dict depending on number of breaks
-
-
-
-
+run = True
+replacevalues=True
+averagevalues=[]
+averagetot=0
+previousaverage=0
+pausedtime=0
+runtime=True
 while True:
-    stop_timer = 0 # stores time when timer was stopped
-    stopped_time = 0 # counts seconds it has been stopped
+    distance = us100.distance
+    difference = int(current_time - start_time)
 
+   # print("time difference: ", difference)
+    while len(averagevalues)<=9:            #fill the list initially
+        averagevalues.append(distance)
+        distance = us100.distance
+    for i in averagevalues:                 #add all the values together
+        averagetot+=i
+     #   print(averagetot)
+   # print("averagetot",averagetot)
+    average=averagetot/len(averagevalues)
+    #print(averagevalues)
+ #   print(average)
+    while replacevalues==True:                 #move all the values forward and replace last value
+        averagevalues[0]=averagevalues[1]
+        averagevalues[1]=averagevalues[2]
+        averagevalues[2]=averagevalues[3]
+        averagevalues[3]=averagevalues[4]
+        averagevalues[4]=averagevalues[5]
+        averagevalues[5]=averagevalues[6]
+        averagevalues[6]=averagevalues[7]
+        averagevalues[7]=averagevalues[8]
+        averagevalues[8]=averagevalues[9]
+        averagevalues[9]=distance
+        replacevalues=False
+   # print("moved: ", averagevalues)
+    if average-previousaverage>20:           #leave
+       pausedtime=current_time
+       current_time=pausedtime
+       runtime=False
+     #  print(average-previousaverage)
+    #print(runtime)
 
-    i = 0
-    previous = time.time()
+    if previousaverage-average>=-20:
+        current_time=time.time()
+        runtime=True
+        print("working")
 
-    while i < pixel_amount:
-        current = time.time()
-        if cp.switch == True: # this will be replaced by flag of uder being there
+    if runtime==False:
+        current_time=pausedtime
+        print("break")
 
-            if (i+1) % break_interval == 0 and i!= 9: # lights pixels according to break schedule
-                cp.pixels[i] = blue 
+  #  print("time at end of programme. Curr time: ", current_time, " paus time: ", pausedtime)
+   # print(runtime)
 
-            else:
-                cp.pixels[i] = green
+    time.sleep(1)
+    replacevalues=True
+    averagetot=0
+    previousaverage=average
 
-
-            time_elapsed_secs = (current - previous) - stopped_time
-            #print("Seconds elapsed: ",time_elapsed_secs) #for testing
-            time.sleep(0.5)
-
-            if time_elapsed_secs % work_time_increment == 0 and time_elapsed_secs != 0:
-                i+= 1
-                time.sleep(1) # lights up next pixel when time has elapsed
-
-        else: # if user is not there
-
-            current_stop = time.time() #times when timer is stopped
-            stopped_time =(current_stop - previous) - time_elapsed_secs # counts how long it was stopped, will be subtracted from elapsed time when timer starts again
-            #print("stopped at: ", time_elapsed_secs) # for testing
-            #print("stopped for: ", stopped_time) # for testing
-            time.sleep(0.5)
-
-## this is the code that switches between visual modality (lights) and auditory modality (sound tone), and allows lights to be turned on/off [Harry]
-from adafruit_circuitplayground import cp
-
-cp.pixels.brightness = 0.3
-
-while True:
-    if cp.switch:
-        if cp.button_a:
-            cp.pixels.fill((50, 0, 0))  # Turn on using Button A (D4) (Switch with counting up time code)
-        elif cp.button_b:
-            cp.pixels.fill((0, 0, 0))   # Turn off using Button B (D5)
-    else:
-        cp.pixels.fill((0, 0, 0))   # When switched, turn off LEDS automatically and play tune
-        cp.play_tone(262, 1)
-        cp.play_tone(294, 1)
-      
