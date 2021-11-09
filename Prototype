@@ -34,6 +34,7 @@ time_elapsed_secs = 0
 break_amount = 3
 break_interval_lib = {1:5,2:4,3:3,4:2}
 break_interval = break_interval_lib[break_amount]
+turn_off = False
 
 #----------------------main code---------------------------
 while True:
@@ -51,9 +52,9 @@ while True:
             distance = us100.distance
         for i in averagevalues:                 #add all the values together
             averagetot+=i
-         
+
         average=averagetot/len(averagevalues)
-        
+
         print(average)
         while replacevalues==True:                 #move all the values forward and replace last value
             averagevalues[0]=averagevalues[1]
@@ -71,38 +72,54 @@ while True:
 
         if math.fabs(average-previousaverage)>=10:
             if average-previousaverage<0:
-                
+
                 runtime=True
 
             elif average-previousaverage>0:
-                
+
                 runtime=False
         if runtime==True:
+            
             if (j+1) % break_interval == 0 and i!= 9:
                 cp.pixels[j] = blue
-
+                if cp.switch == True: # beep
+                    while turn_off == False:# beep
+                        cp.play_tone(262,0.5)
+                        #time.sleep(0.05)
+                        if cp.button_a == True:
+                            turn_off = True
+                else: #flash
+                    #if cp.button_a == True:
+                        #turn_off = True
+                    while turn_off == False:
+                        cp.pixels[j] = blue
+                        time.sleep(0.1) 
+                        cp.pixels[j] = off_state
+                        time.sleep(0.1)
+                        if cp.button_a: 
+                            turn_off = True
+                cp.pixels[j] = blue
+            
             else:
                 cp.pixels[j] = green
-
+        
 
             time_elapsed_secs = (current - previous) - stopped_time
             print("Seconds elapsed: ",time_elapsed_secs)
-            
+
 
             if time_elapsed_secs % work_time_increment == 0 and time_elapsed_secs != 0:
                 j+= 1
+                turn_off = False
                 time.sleep(1)
         elif runtime==False:
             current_stop = time.time()
             stopped_time =(current_stop - previous) - time_elapsed_secs
             print("stopped at: ", time_elapsed_secs)
             print("stopped for: ", stopped_time)
-     
+
 
         time.sleep(0.2)
         replacevalues=True
         averagetot=0
         previousaverage=average
-
-
-# Schreibe hier Deinen Code :-)
