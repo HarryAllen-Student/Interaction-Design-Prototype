@@ -1,0 +1,77 @@
+from adafruit_circuitplayground import cp
+import board # access board pins to connext external sensors/actuators
+import time
+
+#---------------------------- setup for time lights --------------------
+
+green = [0,255,0] # work time colour
+blue = [0,0,255] # break time colour
+off_state = [0,0,0]
+pixel_amount = len(cp.pixels)
+cp.pixels.brightness = 0.1
+
+work_time_minutes = 50
+work_time_increment = work_time_minutes/pixel_amount # set how many minutes are in 1 neopixel (10)
+time_elapsed_secs = 0
+
+break_amount = 3
+break_interval_lib = {1:5,2:4,3:3,4:2}
+break_interval = break_interval_lib[break_amount]
+turn_off = False
+j = 0
+
+#----------------------main code---------------------------
+while True:
+
+    stop_timer = 0
+    stopped_time = 0
+    previous = time.time()
+
+
+    while j < pixel_amount:
+        current = time.time()
+
+        if (j+1) % break_interval == 0 and j!= 9:
+            cp.pixels[(9-j)] = blue
+            if cp.switch == True: # beep
+                while turn_off == False:# beep
+                    cp.play_tone(262,0.5)
+                    #time.sleep(0.05)
+                    current_stop = time.time()
+                    stopped_time =(current_stop - previous) - time_elapsed_secs
+                    print("stopped at: ", time_elapsed_secs)
+                    print("stopped for: ", stopped_time)
+                    if cp.button_b == True:
+                        turn_off = True
+            else:
+                while turn_off == False:
+                    cp.pixels.brightness = 0.6
+                    current_stop = time.time()
+                    stopped_time =(current_stop - previous) - time_elapsed_secs
+                    print("stopped at: ", time_elapsed_secs)
+                    print("stopped for: ", stopped_time)
+                    cp.pixels[9-j] = blue
+                    time.sleep(0.1)
+                    cp.pixels[9-j] = off_state
+                    time.sleep(0.1)
+                    if cp.button_b:
+                        turn_off = True
+                        cp.pixels.brightness = 0.1
+            cp.pixels[9-j] = blue
+
+        else:
+                cp.pixels[9-j] = green
+
+
+        time_elapsed_secs = (current - previous) - stopped_time
+        print("Seconds elapsed: ",time_elapsed_secs)
+
+
+        if time_elapsed_secs % work_time_increment == 0 and time_elapsed_secs != 0:
+            j+= 1
+            turn_off = False
+            time.sleep(1)
+
+
+        time.sleep(0.2)
+
