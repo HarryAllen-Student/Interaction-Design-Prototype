@@ -10,7 +10,7 @@ off_state = [0,0,0]
 pixel_amount = len(cp.pixels)
 cp.pixels.brightness = 0.1
 
-work_time_minutes = 50
+work_time_minutes = 600
 work_time_increment = work_time_minutes/pixel_amount # set how many minutes are in 1 neopixel (10)
 time_elapsed_secs = 0
 
@@ -30,8 +30,11 @@ while True:
 
     while j < pixel_amount:
         current = time.time()
+        time_elapsed_secs = (current - previous) - stopped_time
+        print("Seconds elapsed: ",time_elapsed_secs)
+        
 
-        if (j+1) % break_interval == 0 and j!= 9:
+        if (j+1) % break_interval == 0 and j!= 9 and j!= 0:
             cp.pixels[(9-j)] = blue
             if cp.switch == True: # beep
                 while turn_off == False:# beep
@@ -45,7 +48,7 @@ while True:
                         turn_off = True
             else:
                 while turn_off == False:
-                    cp.pixels.brightness = 0.6
+                    cp.pixels.brightness = 0.5
                     current_stop = time.time()
                     stopped_time =(current_stop - previous) - time_elapsed_secs
                     print("stopped at: ", time_elapsed_secs)
@@ -60,14 +63,13 @@ while True:
             cp.pixels[9-j] = blue
 
         else:
-                cp.pixels[9-j] = green
+                if time_elapsed_secs >= work_time_increment:
+                    cp.pixels[9-j] = green
+                else: 
+                    cp.pixels.fill(off_state)
 
 
-        time_elapsed_secs = (current - previous) - stopped_time
-        print("Seconds elapsed: ",time_elapsed_secs)
-
-
-        if time_elapsed_secs % work_time_increment == 0 and time_elapsed_secs != 0:
+        if time_elapsed_secs % work_time_increment == 0 and time_elapsed_secs != 0 and time_elapsed_secs >= (work_time_increment*2):
             j+= 1
             turn_off = False
             time.sleep(1)
