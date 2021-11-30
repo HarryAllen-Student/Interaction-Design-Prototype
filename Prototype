@@ -81,32 +81,38 @@ while True:
                 runtime=False
         if runtime==True:
 
-            if (j+1) % break_interval == 0 and i!= 9:
-                cp.pixels[j] = blue
+            if (j+1) % break_interval == 0 and j!= 9:
+                cp.pixels[(9-j)] = blue
                 if cp.switch == True: # beep
                     while turn_off == False:# beep
+                        cp.pixels.brightness = 0.5
                         cp.play_tone(262,0.5)
                         #time.sleep(0.05)
-                        if cp.button_a == True:
+                        if cp.button_b == True:
                             turn_off = True
+                            cp.pixels.brightness = 0.1
                 else: #flash
                     #if cp.button_a == True:
                         #turn_off = True
                     while turn_off == False:
-                        cp.pixels[j] = blue
+                        cp.pixels.brightness = 0.5
+                        cp.pixels[9-j] = blue
                         time.sleep(0.1)
-                        cp.pixels[j] = off_state
+                        cp.pixels[9-j] = off_state
                         time.sleep(0.1)
-                        if cp.button_a:
+                        if cp.button_b:
                             turn_off = True
-                cp.pixels[j] = blue
+                            cp.pixels.brightness = 0.1
+                cp.pixels[9-j] = blue
 
 
 
 
             else:
-                cp.pixels[j] = green
-
+                if time_elapsed_secs >= work_time_increment:
+                    cp.pixels[9-j] = green
+                else: 
+                    cp.pixels.fill(off_state)
 
 
 
@@ -114,7 +120,7 @@ while True:
             print("Seconds elapsed: ",time_elapsed_secs)
 
 
-            if time_elapsed_secs % work_time_increment == 0 and time_elapsed_secs != 0:
+            if time_elapsed_secs % work_time_increment == 0 and time_elapsed_secs != 0 and time_elapsed_secs >= (work_time_increment*2):
                 j+= 1
                 turn_off = False
                 time.sleep(1)
@@ -129,3 +135,6 @@ while True:
         replacevalues=True
         averagetot=0
         previousaverage=average
+
+
+# Schreibe hier Deinen Code :-)
